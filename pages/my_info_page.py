@@ -1,0 +1,32 @@
+import allure
+
+from selenium.webdriver import Keys
+from selenium.webdriver.support import expected_conditions as EC
+
+from base.base_page import BasePage
+from config.links import Links
+from locators.my_info_page_locatorts import PersonalPageLocators
+
+
+class PersonalPage(BasePage):
+
+    PAGE_URL = Links.PERSONAL_PAGE
+    locators = PersonalPageLocators()
+
+    def change_first_name(self, new_name):
+        with allure.step(f'Change first name on {new_name}'):
+            first_name_field =self.wait.until(EC.element_to_be_clickable(self.locators.FIRST_NAME_FIELD))
+            first_name_field.send_keys(Keys.LEFT_CONTROL + "A")
+            first_name_field.send_keys(Keys.BACKSPACE)
+            first_name_field.send_keys(new_name)
+            self.name = new_name
+
+    @allure.step('Save Changes')
+    def save_changes(self):
+        self.wait.until(EC.element_to_be_clickable(self.locators.PERSONAL_DETAIL_SAVE_BUTTON)).click()
+
+    @allure.step('Changes has been saved successfully')
+    def is_changes_save(self):
+        self.wait.until(EC.invisibility_of_element(self.locators.SPINNER))
+        self.wait.until(EC.visibility_of_element_located(self.locators.FIRST_NAME_FIELD))
+        self.wait.until(EC.text_to_be_present_in_element_value(self.locators.FIRST_NAME_FIELD, self.name))
